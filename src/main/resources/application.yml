@@ -1,0 +1,43 @@
+
+
+spring:
+  cloud:
+    function:
+      definition: inputDataConsumer
+    stream:
+      bindings:
+        inputDataConsumer-in-0:
+          group: input-data-consumer
+          destination: ${app.kafka.input-destination}
+      kafka:
+        binder:
+          brokers: localhost:9092
+          consumer-properties:
+            client.id: ACS
+            #earliest: automatically reset the offset to the earliest offset
+            #latest: automatically reset the offset to the latest offset
+            auto.offset.reset: earliest
+            group.instance.id: instance
+            auto.commit.interval.ms: 500
+          required-acks: 1
+        bindings:
+          inputDataConsumer-in-0:
+            consumer:
+              ack-mode: manual
+              enable-dlq: true
+              dlq-name: DLQ.input-data
+
+    config:
+      import-check:
+        enabled: false
+  kafka:
+    admin:
+      client-id: KafkaDemo
+  config:
+    import:
+app:
+  kafka:
+    input-destination: input-data
+    failed-destination: failed-api
+    success-destination: success-api
+
