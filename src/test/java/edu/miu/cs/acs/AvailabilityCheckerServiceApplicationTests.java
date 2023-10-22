@@ -1,10 +1,10 @@
-package com.swa.availability.checker;
+package edu.miu.cs.acs;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ApplicationTests {
+class AvailabilityCheckerServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
