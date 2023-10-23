@@ -1,4 +1,4 @@
-package edu.miu.cs.acs.domain.UrlMessageProvider.models;
+package edu.miu.cs.acs.models;
 
 public enum ApiTestStatus {
     SUCCESSFUL,

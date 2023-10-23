@@ -1,4 +1,4 @@
-package edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice;
+package edu.miu.cs.acs.service.apicallservice;
 
 import lombok.Getter;
 import lombok.Setter;

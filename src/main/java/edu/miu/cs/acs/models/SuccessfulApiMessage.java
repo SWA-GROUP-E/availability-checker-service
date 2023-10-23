@@ -1,13 +1,12 @@
-package edu.miu.cs.acs.domain.UrlMessageProvider.models;
+package edu.miu.cs.acs.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
 public class SuccessfulApiMessage implements CheckedAPIMessage{
     private ApiTestStatus type;
-    private String ApiUrl;
-    private String ApiKey;
+    private String apiUrl;
+    private String apiKey;
 }

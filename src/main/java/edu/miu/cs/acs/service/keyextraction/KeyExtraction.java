@@ -1,4 +1,4 @@
-package edu.miu.cs.acs.domain.UrlMessageProvider.keyextraction;
+package edu.miu.cs.acs.service.keyextraction;
 
 import edu.miu.cs.acs.utils.UrlUtils;
 import lombok.extern.log4j.Log4j2;

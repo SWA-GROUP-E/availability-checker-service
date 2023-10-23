@@ -1,8 +1,10 @@
-package edu.miu.cs.acs.domain.UrlMessageProvider.controlflow;
+package edu.miu.cs.acs.domain.controlflow;
 
-import edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice.ApiTestService;
-import edu.miu.cs.acs.domain.UrlMessageProvider.keyextraction.KeyExtraction;
-import edu.miu.cs.acs.domain.UrlMessageProvider.models.*;
+import edu.miu.cs.acs.domain.models.*;
+import edu.miu.cs.acs.models.*;
+import edu.miu.cs.acs.service.apicallservice.ApiTestService;
+import edu.miu.cs.acs.service.keyextraction.KeyExtraction;
+import edu.miu.cs.acs.domain.urlmessageprovider.models.*;
 import edu.miu.cs.acs.utils.UrlUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
