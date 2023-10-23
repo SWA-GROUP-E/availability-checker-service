@@ -1,6 +1,8 @@
 package edu.miu.cs.acs.integration;
 
 import edu.miu.cs.acs.domain.ApiInfo;
+import edu.miu.cs.acs.domain.ApiTestStatus;
+import edu.miu.cs.acs.service.ApiTestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -22,34 +24,29 @@ public class IntegrationFlows {
 
     private IntegrationProperties integrationProperties;
 
+    private ApiTestService apiTestService;
+
     @ServiceActivator(inputChannel = Channels.INPUT_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<ApiInfo> processInput(Message<String> inputMessage) {
         log.info("Processing input message: {}", inputMessage);
-
-        // Put the API test call here
-        String link = inputMessage.getPayload();
-
+        String url = inputMessage.getPayload();
         Message<ApiInfo> outMessage = MessageBuilder
                 .withPayload(ApiInfo
-                .builder()
-                .link(link)
-                .build())
+                        .builder()
+                        .url(url)
+                        .build())
                 .copyHeaders(inputMessage.getHeaders())
                 .build();
-
-        long currentMills = System.currentTimeMillis();
-        if (currentMills % 3 == 0) {
-            return MessageBuilder
-                    .fromMessage(outMessage)
-                    .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.FAILED.getValue()).build();
-        } else if (currentMills % 5 == 0) {
-            return MessageBuilder
-                    .fromMessage(outMessage)
-                    .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.UNAUTHORIZED.getValue()).build();
+        ApiTestStatus testStatus = apiTestService.test(url);
+        ServiceLine serviceLine;
+        switch (testStatus) {
+            case SUCCESSFUL -> serviceLine = ServiceLine.SUCCESSFUL;
+            case UNAUTHORIZED -> serviceLine = ServiceLine.UNAUTHORIZED;
+            default -> serviceLine = ServiceLine.FAILED;
         }
         return MessageBuilder
                 .fromMessage(outMessage)
-                .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.SUCCESSFUL.getValue()).build();
+                .setHeader(HeaderUtils.SERVICE_LINE, serviceLine.getValue()).build();
     }
 
     @ServiceActivator(inputChannel = Channels.UNAUTHORIZED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
@@ -64,7 +61,7 @@ public class IntegrationFlows {
             return MessageBuilder
                     .withPayload(ApiInfo
                             .builder()
-                            .link(link)
+                            .url(link)
                             .build())
                     .copyHeaders(inputMessage.getHeaders())
                     .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.FAILED.getValue())
@@ -73,7 +70,7 @@ public class IntegrationFlows {
         return MessageBuilder
                 .withPayload(ApiInfo
                         .builder()
-                        .link(link)
+                        .url(link)
                         .apiKey(String.valueOf(currentMills))
                         .build())
                 .copyHeaders(inputMessage.getHeaders())
@@ -102,7 +99,7 @@ public class IntegrationFlows {
     public void sendFailedApiMessage(Message<ApiInfo> message) {
         streamBridge.send(integrationProperties.getFailedDestination(), message);
         acknowledge(message);
-        log.info("Sent message to {}. Message = {}", integrationProperties.getSuccessDestination(), message);
+        log.info("Sent message to {}. Message = {}", integrationProperties.getFailedDestination(), message);
     }
 
     private void acknowledge(Message<?> message) {
