@@ -1,6 +1,6 @@
-package edu.miu.cs.acs.service;
+package edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice;
 
-import edu.miu.cs.acs.domain.ApiTestStatus;
+import edu.miu.cs.acs.domain.UrlMessageProvider.models.ApiTestStatus;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.*;
@@ -56,6 +56,7 @@ public class ApiTestService {
         } else if (apiTestProperties.getUnauthorizedHttpStatuses().contains(statusCode.value())) {
             return ApiTestStatus.UNAUTHORIZED;
         }
+
         return ApiTestStatus.FAILED;
     }
 }

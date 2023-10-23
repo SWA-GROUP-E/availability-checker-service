@@ -1,4 +1,4 @@
-package edu.miu.cs.acs.service;
+package edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,4 +14,5 @@ import java.util.Set;
 public class ApiTestProperties {
     private Set<Integer> successfulHttpStatuses;
     private Set<Integer> unauthorizedHttpStatuses;
+    private Set<Integer> paidHttpStatuses;
 }

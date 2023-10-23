@@ -42,6 +42,7 @@ app:
     test:
       successful-http-statuses: 200,201,202,203,204
       unauthorized-http-statuses: 401,403
+      paid-http-statuses: 402, 429
 
 logging:
   level:

@@ -11,5 +11,6 @@ import java.io.Serializable;
 @Builder
 public class ApiInfo implements Serializable {
     private String url;
+    private boolean needsKey;
     private String apiKey;
 }

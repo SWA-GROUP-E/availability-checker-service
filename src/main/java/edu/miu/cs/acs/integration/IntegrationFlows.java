@@ -1,8 +1,9 @@
 package edu.miu.cs.acs.integration;
 
 import edu.miu.cs.acs.domain.ApiInfo;
-import edu.miu.cs.acs.domain.ApiTestStatus;
-import edu.miu.cs.acs.service.ApiTestService;
+import edu.miu.cs.acs.domain.UrlMessageProvider.controlflow.ApiControlFlow;
+import edu.miu.cs.acs.domain.UrlMessageProvider.models.ApiTestStatus;
+import edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice.ApiTestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -23,8 +24,7 @@ public class IntegrationFlows {
     private StreamBridge streamBridge;
 
     private IntegrationProperties integrationProperties;
-
-    private ApiTestService apiTestService;
+    private ApiControlFlow controlFlow;
 
     @ServiceActivator(inputChannel = Channels.INPUT_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<ApiInfo> processInput(Message<String> inputMessage) {
@@ -37,7 +37,7 @@ public class IntegrationFlows {
                         .build())
                 .copyHeaders(inputMessage.getHeaders())
                 .build();
-        ApiTestStatus testStatus = apiTestService.test(url);
+        ApiTestStatus testStatus = controlFlow.handle(url).getType();
         ServiceLine serviceLine;
         switch (testStatus) {
             case SUCCESSFUL -> serviceLine = ServiceLine.SUCCESSFUL;
