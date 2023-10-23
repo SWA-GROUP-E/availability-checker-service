@@ -10,6 +10,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class ApiInfo implements Serializable {
-    private String link;
+    private String url;
     private String apiKey;
 }

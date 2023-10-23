@@ -1,5 +1,3 @@
-
-
 spring:
   cloud:
     function:
@@ -40,4 +38,13 @@ app:
     input-destination: input-data
     failed-destination: failed-api
     success-destination: success-api
+  api:
+    test:
+      successful-http-statuses: 200,201,202,203,204
+      unauthorized-http-statuses: 401,403
 
+logging:
+  level:
+    "org.apache.kafka.clients.admin.AdminClientConfig": WARN
+    "org.apache.kafka.clients.consumer.ConsumerConfig": WARN
+    "org.apache.kafka.clients.producer.ProducerConfig": WARN
