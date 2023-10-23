@@ -1,4 +1,4 @@
-package edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice;
+package edu.miu.cs.acs.service.apicallservice;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
