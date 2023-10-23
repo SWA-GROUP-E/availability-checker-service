@@ -1,8 +1,8 @@
 package edu.miu.cs.acs.integration;
 
 import edu.miu.cs.acs.domain.ApiInfo;
-import edu.miu.cs.acs.domain.ApiTestStatus;
-import edu.miu.cs.acs.service.ApiTestService;
+import edu.miu.cs.acs.domain.UrlMessageProvider.models.ApiTestStatus;
+import edu.miu.cs.acs.domain.UrlMessageProvider.apicallservice.ApiTestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.stream.function.StreamBridge;
