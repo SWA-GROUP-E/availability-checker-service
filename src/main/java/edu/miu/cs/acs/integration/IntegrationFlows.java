@@ -1,8 +1,14 @@
 package edu.miu.cs.acs.integration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.miu.cs.acs.domain.ApiInfo;
+import edu.miu.cs.acs.domain.HealthyApiInfo;
+import edu.miu.cs.acs.domain.UnsureApiInfo;
 import edu.miu.cs.acs.domain.controlflow.ApiControlFlow;
 import edu.miu.cs.acs.models.ApiTestStatus;
+import edu.miu.cs.acs.models.FailedApiMessage;
+import edu.miu.cs.acs.models.SuccessfulApiMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -21,7 +27,7 @@ import org.springframework.messaging.support.MessageBuilder;
 public class IntegrationFlows {
 
     private StreamBridge streamBridge;
-
+    private ObjectMapper objectMapper;
     private IntegrationProperties integrationProperties;
     private ApiControlFlow controlFlow;
 
@@ -29,13 +35,13 @@ public class IntegrationFlows {
     public Message<ApiInfo> processInput(Message<String> inputMessage) {
         log.info("Processing input message: {}", inputMessage);
         String url = inputMessage.getPayload();
+        ApiInfo payload = new ApiInfo(url);
+
         Message<ApiInfo> outMessage = MessageBuilder
-                .withPayload(ApiInfo
-                        .builder()
-                        .url(url)
-                        .build())
+                .withPayload(payload)
                 .copyHeaders(inputMessage.getHeaders())
                 .build();
+
         ApiTestStatus testStatus = controlFlow.handle(url).getType();
         ServiceLine serviceLine;
         switch (testStatus) {
@@ -49,29 +55,55 @@ public class IntegrationFlows {
     }
 
     @ServiceActivator(inputChannel = Channels.UNAUTHORIZED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
-    public Message<ApiInfo> processUnauthorizedApi(Message<String> inputMessage) {
+    public Message<HealthyApiInfo> processUnauthorizedApi(Message<String> inputMessage) throws JsonProcessingException {
         log.info("Processing unauthorized api message: {}", inputMessage);
 
-        // Put the API key search here
-        String link = inputMessage.getPayload();
+        String inputMessagePayload = inputMessage.getPayload();
+        HealthyApiInfo payload = new HealthyApiInfo(
+                objectMapper.readValue(inputMessagePayload, ApiInfo.class).getUrl(),
+                false,
+                null
+        );
 
-        long currentMills = System.currentTimeMillis();
-        if (currentMills % 3 == 0) {
-            return MessageBuilder
-                    .withPayload(ApiInfo
-                            .builder()
-                            .url(link)
-                            .build())
-                    .copyHeaders(inputMessage.getHeaders())
-                    .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.FAILED.getValue())
-                    .build();
-        }
         return MessageBuilder
-                .withPayload(ApiInfo
-                        .builder()
-                        .url(link)
-                        .apiKey(String.valueOf(currentMills))
-                        .build())
+                .withPayload(payload)
+                .copyHeaders(inputMessage.getHeaders())
+                .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.SUCCESSFUL.getValue())
+                .build();
+    }
+
+    @ServiceActivator(inputChannel = Channels.SUCCESSFUL_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
+    public Message<HealthyApiInfo> processSuccessfulApi(Message<String> inputMessage) throws JsonProcessingException {
+        log.info("Processing successful api message: {}", inputMessage);
+
+        String urlFromInputMessage = objectMapper.readValue(inputMessage.getPayload(), ApiInfo.class).getUrl();
+        SuccessfulApiMessage apiMessage = (SuccessfulApiMessage) controlFlow.handle(urlFromInputMessage);
+
+        HealthyApiInfo payload = new HealthyApiInfo(
+                urlFromInputMessage,
+                true,
+                apiMessage.getApiKey()
+        );
+
+        return MessageBuilder
+                .withPayload(payload)
+                .copyHeaders(inputMessage.getHeaders())
+                .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.SUCCESSFUL.getValue())
+                .build();
+    }
+
+    @ServiceActivator(inputChannel = Channels.FAILED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
+    public Message<UnsureApiInfo> processFailedApi(Message<String> inputMessage) throws JsonProcessingException {
+        log.info("Processing failed api message: {}", inputMessage);
+
+        String inputMessagePayload = inputMessage.getPayload();
+        UnsureApiInfo payload = new UnsureApiInfo(
+                objectMapper.readValue(inputMessagePayload, ApiInfo.class).getUrl(),
+                null
+        );
+
+        return MessageBuilder
+                .withPayload(payload)
                 .copyHeaders(inputMessage.getHeaders())
                 .setHeader(HeaderUtils.SERVICE_LINE, ServiceLine.SUCCESSFUL.getValue())
                 .build();
@@ -88,14 +120,14 @@ public class IntegrationFlows {
     }
 
     @ServiceActivator(inputChannel = Channels.SUCCESSFUL_API_CHANNEL)
-    public void sendSuccessfulApiMessage(Message<ApiInfo> message) {
+    public void sendSuccessfulApiMessage(Message<HealthyApiInfo> message) {
         streamBridge.send(integrationProperties.getSuccessDestination(), message);
         acknowledge(message);
         log.info("Sent message to {}. Message = {}", integrationProperties.getSuccessDestination(), message);
     }
 
     @ServiceActivator(inputChannel = Channels.FAILED_API_CHANNEL)
-    public void sendFailedApiMessage(Message<ApiInfo> message) {
+    public void sendFailedApiMessage(Message<FailedApiMessage> message) {
         streamBridge.send(integrationProperties.getFailedDestination(), message);
         acknowledge(message);
         log.info("Sent message to {}. Message = {}", integrationProperties.getFailedDestination(), message);

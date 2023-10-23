@@ -2,15 +2,10 @@ package edu.miu.cs.acs.domain;
 
 import lombok.*;
 
-import java.io.Serializable;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class ApiInfo implements Serializable {
-    private String url;
-    private boolean needsKey;
-    private String apiKey;
+public class ApiInfo {
+    public String url;
 }
