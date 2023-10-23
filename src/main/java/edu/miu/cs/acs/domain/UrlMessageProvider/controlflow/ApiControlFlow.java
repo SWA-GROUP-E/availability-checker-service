@@ -11,15 +11,15 @@ import org.springframework.stereotype.Service;
 @Log4j2
 @Service
 @AllArgsConstructor
-public class ControlFlow {
+public class ApiControlFlow {
 
     ApiTestService apiCallTest;
     KeyExtraction keyExtractor;
 
-    public CheckedAPIMessage handle(String url) throws Exception {
+    public CheckedAPIMessage handle(String url){
         if(!UrlUtils.isValidURL(url)) {
             log.warn("Invalid Api URL {}", url);
-            throw new Exception("Invalid URL");
+            return new FailedApiMessage(ApiTestStatus.FAILED, url);
         }
 
         ApiTestStatus flowResult = apiCallTest.test(url);
