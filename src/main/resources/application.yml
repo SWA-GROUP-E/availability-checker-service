@@ -35,9 +35,9 @@ spring:
     import:
 app:
   kafka:
-    input-destination: input-data
-    failed-destination: failed-api
-    success-destination: success-api
+    input-destination: NEWAPI
+    failed-destination: UnsureAPI
+    success-destination: HealthyAPI
   api:
     test:
       successful-http-statuses: 200,201,202,203,204
