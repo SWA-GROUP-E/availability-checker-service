@@ -3,6 +3,7 @@ package edu.miu.cs.acs.domain.controlflow;
 import edu.miu.cs.acs.models.*;
 import edu.miu.cs.acs.service.apicallservice.ApiTestService;
 import edu.miu.cs.acs.service.keyextraction.KeyExtraction;
+import edu.miu.cs.acs.service.keyextraction.KeyExtractionProperties;
 import edu.miu.cs.acs.utils.UrlUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,6 +18,8 @@ public class ApiControlFlow {
 
     ApiTestService apiCallTest;
     KeyExtraction keyExtractor;
+
+    private KeyExtractionProperties keyExtractionProperties;
 
     public CheckedAPIMessage handle(String url){
         if(!UrlUtils.isValidURL(url)) {
@@ -36,7 +39,7 @@ public class ApiControlFlow {
 
     private CheckedAPIMessage tryToExtractKey(String url) {
         try {
-            Set<String> apiKeys = keyExtractor.getKeys(url, 2);
+            Set<String> apiKeys = keyExtractor.getKeys(url, keyExtractionProperties.getScrapingDepthLevel());
             String validApiKey = null;
             for (String apiKey : apiKeys) {
                 if (apiCallTest.test(url, apiKey) == ApiTestStatus.SUCCESSFUL) {

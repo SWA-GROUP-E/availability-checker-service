@@ -1,3 +1,5 @@
+server:
+  port: 8081
 spring:
   cloud:
     function:
@@ -30,7 +32,7 @@ spring:
         enabled: false
   kafka:
     admin:
-      client-id: KafkaDemo
+      client-id: ACS
   config:
     import:
 app:
@@ -42,10 +44,18 @@ app:
     test:
       successful-http-statuses: 200,201,202,203,204
       unauthorized-http-statuses: 401,403
-      paid-http-statuses: 402, 429
+  key-extraction:
+    scraping-depth-level: 2
 
 logging:
   level:
     "org.apache.kafka.clients.admin.AdminClientConfig": WARN
     "org.apache.kafka.clients.consumer.ConsumerConfig": WARN
     "org.apache.kafka.clients.producer.ProducerConfig": WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - "*"
