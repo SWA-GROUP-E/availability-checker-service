@@ -1,6 +1,5 @@
 package edu.miu.cs.acs.integration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
@@ -22,10 +21,5 @@ public class BindingsConfiguration {
             log.info("Received input message: {}", inMessage);
             messageGateway.sendToInputChannel(inMessage);
         };
-    }
-
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
     }
 }

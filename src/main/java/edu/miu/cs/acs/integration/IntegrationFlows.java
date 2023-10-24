@@ -1,7 +1,6 @@
 package edu.miu.cs.acs.integration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.miu.cs.acs.domain.ApiInfo;
 import edu.miu.cs.acs.domain.HealthyApiInfo;
 import edu.miu.cs.acs.domain.UnsureApiInfo;
@@ -27,7 +26,6 @@ import org.springframework.messaging.support.MessageBuilder;
 public class IntegrationFlows {
 
     private StreamBridge streamBridge;
-    private ObjectMapper objectMapper;
     private IntegrationProperties integrationProperties;
     private ApiControlFlow controlFlow;
 
@@ -55,12 +53,11 @@ public class IntegrationFlows {
     }
 
     @ServiceActivator(inputChannel = Channels.UNAUTHORIZED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
-    public Message<HealthyApiInfo> processUnauthorizedApi(Message<String> inputMessage) throws JsonProcessingException {
+    public Message<HealthyApiInfo> processUnauthorizedApi(Message<ApiInfo> inputMessage) throws JsonProcessingException {
         log.info("Processing unauthorized api message: {}", inputMessage);
 
-        String inputMessagePayload = inputMessage.getPayload();
         HealthyApiInfo payload = new HealthyApiInfo(
-                objectMapper.readValue(inputMessagePayload, ApiInfo.class).getUrl(),
+                inputMessage.getPayload().getUrl(),
                 false,
                 null
         );
@@ -73,10 +70,10 @@ public class IntegrationFlows {
     }
 
     @ServiceActivator(inputChannel = Channels.SUCCESSFUL_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
-    public Message<HealthyApiInfo> processSuccessfulApi(Message<String> inputMessage) throws JsonProcessingException {
+    public Message<HealthyApiInfo> processSuccessfulApi(Message<ApiInfo> inputMessage) throws JsonProcessingException {
         log.info("Processing successful api message: {}", inputMessage);
 
-        String urlFromInputMessage = objectMapper.readValue(inputMessage.getPayload(), ApiInfo.class).getUrl();
+        String urlFromInputMessage = inputMessage.getPayload().getUrl();
         SuccessfulApiMessage apiMessage = (SuccessfulApiMessage) controlFlow.handle(urlFromInputMessage);
 
         HealthyApiInfo payload = new HealthyApiInfo(
@@ -93,12 +90,12 @@ public class IntegrationFlows {
     }
 
     @ServiceActivator(inputChannel = Channels.FAILED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
-    public Message<UnsureApiInfo> processFailedApi(Message<String> inputMessage) throws JsonProcessingException {
+    public Message<UnsureApiInfo> processFailedApi(Message<ApiInfo> inputMessage) throws JsonProcessingException {
         log.info("Processing failed api message: {}", inputMessage);
 
-        String inputMessagePayload = inputMessage.getPayload();
+        String inputMessageUrl = inputMessage.getPayload().getUrl();
         UnsureApiInfo payload = new UnsureApiInfo(
-                objectMapper.readValue(inputMessagePayload, ApiInfo.class).getUrl(),
+                inputMessageUrl,
                 null
         );
 
