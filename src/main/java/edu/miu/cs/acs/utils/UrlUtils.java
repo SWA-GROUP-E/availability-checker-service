@@ -1,28 +1,24 @@
 package edu.miu.cs.acs.utils;
 
-import org.springframework.stereotype.Service;
-
 import java.net.URI;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.net.URL;
 
 public class UrlUtils {
 
-    private static final String URL_REGEX = "^(http|https)://\\w+\\.\\w+(\\/[\\w\\.]+)*$";
-
     public static boolean isValidURL(String url) {
-        if (url == null || url.isEmpty()) {
+        if (url == null || url.isBlank()) {
             return false;
         }
-
-        Pattern pattern = Pattern.compile(URL_REGEX);
-        Matcher matcher = pattern.matcher(url);
-
-        return matcher.matches();
+        try {
+            new URL(url).toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static String extractDomain(String url) {
-        if (url == null || url.isEmpty() || !isValidURL(url)) {
+        if (!isValidURL(url)) {
             return null;
         }
 
@@ -33,6 +29,6 @@ public class UrlUtils {
             host = host.replace(".api", "");
         }
 
-        return host;
+        return uri.getScheme() + "://" + host;
     }
 }
