@@ -1,7 +1,16 @@
 server:
   port: 8081
 spring:
+  application:
+    name: AvailabilityCheckService
+  config:
+    import: configserver:http://localhost:8888
+
   cloud:
+    config:
+      discovery:
+        enabled: true
+      name: Availability-Check-Service
     function:
       definition: inputDataConsumer
     stream:
@@ -27,14 +36,9 @@ spring:
               enable-dlq: true
               dlq-name: DLQ.input-data
 
-    config:
-      import-check:
-        enabled: false
   kafka:
     admin:
       client-id: ACS
-  config:
-    import:
 app:
   kafka:
     input-destination: NEWAPI

@@ -11,7 +11,7 @@ public class Channels {
 
     public static final String INPUT_CHANNEL = "NEWAPI";
     public static final String SUCCESSFUL_API_CHANNEL = "HealthyAPI";
-    public static final String UNAUTHORIZED_API_CHANNEL = "HealthyAPI";
+    public static final String UNAUTHORIZED_API_CHANNEL = "UnauthorizedAPI";
     public static final String FAILED_API_CHANNEL = "UnsureAPI";
     public static final String ROUTING_CHANNEL = "routingChannel";
 

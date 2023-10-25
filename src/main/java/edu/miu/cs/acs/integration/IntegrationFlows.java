@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.miu.cs.acs.domain.ApiInfo;
 import edu.miu.cs.acs.domain.HealthyApiInfo;
 import edu.miu.cs.acs.domain.UnsureApiInfo;
-import edu.miu.cs.acs.domain.controlflow.ApiControlFlow;
+import edu.miu.cs.acs.domain.controlflow.BusinessOrchestrator;
 import edu.miu.cs.acs.models.ApiTestStatus;
 import edu.miu.cs.acs.models.FailedApiMessage;
 import edu.miu.cs.acs.models.SuccessfulApiMessage;
@@ -27,7 +27,7 @@ public class IntegrationFlows {
 
     private StreamBridge streamBridge;
     private IntegrationProperties integrationProperties;
-    private ApiControlFlow controlFlow;
+    private BusinessOrchestrator controlFlow;
 
     @ServiceActivator(inputChannel = Channels.INPUT_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<ApiInfo> processInput(Message<String> inputMessage) {

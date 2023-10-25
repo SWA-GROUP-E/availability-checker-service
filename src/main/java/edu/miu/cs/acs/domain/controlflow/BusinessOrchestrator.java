@@ -14,7 +14,7 @@ import java.util.Set;
 @Log4j2
 @Service
 @AllArgsConstructor
-public class ApiControlFlow {
+public class BusinessOrchestrator {
 
     ApiTestService apiCallTest;
     KeyExtraction keyExtractor;
