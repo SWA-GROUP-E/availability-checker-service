@@ -1,6 +1,7 @@
 package edu.miu.cs.acs.domain;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
@@ -8,11 +9,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 public class UnsureApiInfo extends ApiInfo implements Serializable {
     private String extraInfo;
-
-    public UnsureApiInfo(String url, String extraInfo) {
-        super(url);
-        this.extraInfo = extraInfo;
-    }
 }

@@ -8,15 +8,15 @@ import org.springframework.messaging.MessageChannel;
 
 
 /*
-* This class is used to define channels
-* */
+ * This class is used to define channels
+ * */
 @MessageEndpoint
 public class Channels {
 
     public static final String INPUT_CHANNEL = "NEWAPI";
-    public static final String SUCCESSFUL_API_CHANNEL = "HealthyAPI";
-    public static final String UNAUTHORIZED_API_CHANNEL = "UnauthorizedAPI";
-    public static final String FAILED_API_CHANNEL = "UnsureAPI";
+    public static final String SUCCESSFUL_API_CHANNEL = "successfulApiChannel";
+    public static final String UNAUTHORIZED_API_CHANNEL = "unauthorizedApiChannel";
+    public static final String FAILED_API_CHANNEL = "failedApiChannel";
     public static final String ROUTING_CHANNEL = "routingChannel";
 
     @Bean(INPUT_CHANNEL)

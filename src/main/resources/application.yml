@@ -35,7 +35,6 @@ spring:
               ack-mode: manual
               enable-dlq: true
               dlq-name: DLQ.input-data
-
   kafka:
     admin:
       client-id: ACS
