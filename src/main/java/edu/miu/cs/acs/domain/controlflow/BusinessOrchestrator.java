@@ -1,6 +1,7 @@
 package edu.miu.cs.acs.domain.controlflow;
 
-import edu.miu.cs.acs.models.*;
+import edu.miu.cs.acs.models.ApiTestStatus;
+import edu.miu.cs.acs.models.CheckedApiMessage;
 import edu.miu.cs.acs.service.apicallservice.ApiTestService;
 import edu.miu.cs.acs.service.keyextraction.KeyExtraction;
 import edu.miu.cs.acs.service.keyextraction.KeyExtractionProperties;
@@ -30,29 +31,27 @@ public class BusinessOrchestrator {
      * @param url
      * @return CheckedAPIMessage
      */
-    public CheckedAPIMessage handle(String url){
+    public CheckedApiMessage testApi(String url){
         if(!UrlUtils.isValidURL(url)) {
             log.warn("Invalid Api URL {}", url);
-            return new FailedApiMessage(ApiTestStatus.FAILED, url);
+            return CheckedApiMessage.builder()
+                    .testStatus(ApiTestStatus.FAILED)
+                    .apiUrl(url).build();
         }
 
         ApiTestStatus flowResult = apiCallTest.test(url);
-        if(flowResult == ApiTestStatus.SUCCESSFUL) {
-            return new UnauthorizedApiMessage(ApiTestStatus.UNAUTHORIZED, url);
-        } else if (flowResult == ApiTestStatus.UNAUTHORIZED) {
-            return tryToExtractKey(url);
-        }
-
-        return new FailedApiMessage(ApiTestStatus.FAILED, url);
+        return CheckedApiMessage.builder()
+                .testStatus(flowResult)
+                .apiUrl(url)
+                .build();
     }
-
 
     /**
      * communicates with the apikey extractor service and tests against the returned key
      * @param url
      * @return CheckedAPIMessage
      */
-    private CheckedAPIMessage tryToExtractKey(String url) {
+    public CheckedApiMessage tryToExtractKey(String url) {
         try {
             Set<String> apiKeys = keyExtractor.getKeys(url, keyExtractionProperties.getScrapingDepthLevel());
             String validApiKey = null;
@@ -62,11 +61,18 @@ public class BusinessOrchestrator {
                 }
             }
             if (validApiKey != null) {
-                return new SuccessfulApiMessage(ApiTestStatus.SUCCESSFUL, url, validApiKey);
+                return CheckedApiMessage.builder()
+                        .testStatus(ApiTestStatus.SUCCESSFUL_AUTHORIZED)
+                        .apiUrl(url)
+                        .apiKey(validApiKey)
+                        .build();
             }
         } catch (Exception ex) {
             log.warn("Couldn't extract key for {}", url);
         }
-        return new FailedApiMessage(ApiTestStatus.FAILED, url);
+        return CheckedApiMessage.builder()
+                .testStatus(ApiTestStatus.FAILED_UNAUTHORIZED)
+                .apiUrl(url)
+                .build();
     }
 }
