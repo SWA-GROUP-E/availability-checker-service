@@ -8,12 +8,23 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
 public class KeyExtraction {
+
+    private static final Pattern API_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9]{32}$");
+
+    public static boolean isPotentialApiKey(String string) {
+        Matcher matcher = API_KEY_PATTERN.matcher(string);
+        return matcher.matches();
+    }
 
     public Set<String> getKeys(String url, int depth) {
         Set<String> apiKeys = new HashSet<>();
@@ -31,7 +42,7 @@ public class KeyExtraction {
                 apiKeys.addAll(getKeys(testUrl, depth));
             }
         } catch (Exception e) {
-            log.debug("error while extracting key for {} error message: {}, depth: {}", url, e.getMessage(), depth);
+            log.warn("error while extracting key for {} error message: {}, depth: {}", url, e.getMessage(), depth);
         }
 
         return apiKeys;
@@ -39,7 +50,8 @@ public class KeyExtraction {
 
     private Set<String> extractUrls(String baseDomain, Document document) {
         Set<String> urls = new HashSet<>();
-        Elements linkElements = document.select("a[href!=''][href]");
+
+        Elements linkElements = document.select("a");
         for (Element linkElement : linkElements) {
             String pathOrUrl = linkElement.attr("href");
             String testUrl;
@@ -54,18 +66,45 @@ public class KeyExtraction {
     }
 
     private Set<String> getKeys(Document document) {
-        Set<String> apiKeys = new HashSet<>();
-        // Select all input elements on the page.
-        Elements inputElements = document.select("input");
+        ArrayList<Element> potentialKeyElements = getPotentialKeyPlaces(document);
 
-        // For each input element, check if it contains the value "api_key".
-        for (Element inputElement : inputElements) {
-            if (inputElement.attr("value").equals("api_key")) {
-                // If the input element contains the value "api_key", extract the API key from the element.
-                String apiKey = inputElement.attr("value");
-                apiKeys.add(apiKey);
-            }
-        }
+        Set<String> apiKeys = potentialKeyElements.stream()
+                .map(Element::text)
+                .filter(KeyExtraction::isPotentialApiKey)
+                .collect(Collectors.toSet());
+
+        return apiKeys;
+    }
+
+    public static ArrayList<Element> getPotentialKeyPlaces(Document document) {
+        ArrayList<Element> apiKeys = new ArrayList<>();
+
+
+        // Scenario 1: Add all input elements with a name that matches "api-key*" or any variations.
+        apiKeys.addAll(document.select("input[name^=api-key], input[name^=api_key]"));
+        apiKeys.addAll(document.select("input[name=api-key], input[name=api_key]"));
+
+        // Scenario 2: Add all elements with a class that contains "api-key" or any variations.
+        apiKeys.addAll(document.select("[class~=.*\\bapi-key\\b.*], [class~=.*\\bapi_key\\b.*]"));
+
+        // Scenario 3: Add all elements with a data-* attribute that contains "api-key" or any variations.
+        apiKeys.addAll(document.select("[data-*~=.*\\bapi-key\\b.*], [data-*~=.*\\bapi_key\\b.*]"));
+
+        // Scenario 4: Add all elements that contain the text "api-key" or any variations.
+        apiKeys.addAll(document.select(":containsOwn(api-key), :containsOwn(api_key)"));
+
+        // Scenario 5: Add all elements with ID containing "api-key" or any variations.
+        apiKeys.addAll(document.select("[id~=.*\\bapi-key\\b.*], [id~=.*\\bapi_key\\b.*]"));
+
+        // Scenario 6: Add all elements with a specific attribute value that matches any variations of "api-key".
+        apiKeys.addAll(document.select("[data-custom-attribute~=^api-key|^api_key|^api-key-id|^api-key-secret|^api-key-token|^api-key-password|^api-key-auth|^api-key-bearer|^api-key-consumer|^api-key-client|^api-key-developer|^api-key-partner|^api-key-vendor|^api-key-public|^api-key-private|^api-key-test|^api-key-prod|^api-key-dev|^api-key-staging|^api-key-production|^api-key-live|^api-key-sandbox|^api-key-sandbox-id|^api-key-sandbox-secret|^api-key-sandbox-token|^api-key-sandbox-password|^api-key-sandbox-auth|^api-key-sandbox-bearer|^api-key-sandbox-consumer|^api-key-sandbox-client|^api-key-sandbox-developer|^api-key-sandbox-partner|^api-key-sandbox-vendor|^api-key-sandbox-public|^api-key-sandbox-private|^api-key-sandbox-test|^api-key-sandbox-prod|^api-key-sandbox-dev|^api-key-sandbox-staging|^api-key-sandbox-production|^api-key-sandbox-live]"));
+
+        // Scenario 7: Add all elements inside a specific parent element with class "api-key" or any variations.
+        apiKeys.addAll(document.select("parent-selector > [class~=.*\\bapi-key\\b.*], parent-selector > [class~=.*\\bapi_key\\b.*]"));
+
+        // Scenario 8: Add all elements with a specific attribute name that contains "api-key" or any variations.
+        apiKeys.addAll(document.select("[data-*=.*\\bapi-key\\b.*], [data-*=.*\\bapi_key\\b.*]"));
+
 
         return apiKeys;
     }
