@@ -5,6 +5,11 @@ import java.net.URL;
 
 public class UrlUtils {
 
+    /**
+     * checks the validity of the input url
+     * @param url
+     * @return
+     */
     public static boolean isValidURL(String url) {
         if (url == null || url.isBlank()) {
             return false;
@@ -17,6 +22,11 @@ public class UrlUtils {
         }
     }
 
+    /**
+     * get the domain of the url input
+     * @param url
+     * @return
+     */
     public static String extractDomain(String url) {
         if (!isValidURL(url)) {
             return null;

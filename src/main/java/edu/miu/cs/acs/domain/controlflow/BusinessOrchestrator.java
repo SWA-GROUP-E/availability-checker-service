@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Set;
 
+
+/**
+ * A provider pattern service that encapsulates all possible outcomes of the api status
+ */
 @Log4j2
 @Service
 @AllArgsConstructor
@@ -21,6 +25,11 @@ public class BusinessOrchestrator {
 
     private KeyExtractionProperties keyExtractionProperties;
 
+    /**
+     * service entry point that starts all the logic of the service (it tests the api for all the possible scenarios and determine the type of the message to publish)
+     * @param url
+     * @return CheckedAPIMessage
+     */
     public CheckedAPIMessage handle(String url){
         if(!UrlUtils.isValidURL(url)) {
             log.warn("Invalid Api URL {}", url);
@@ -37,6 +46,12 @@ public class BusinessOrchestrator {
         return new FailedApiMessage(ApiTestStatus.FAILED, url);
     }
 
+
+    /**
+     * communicates with the apikey extractor service and tests against the returned key
+     * @param url
+     * @return CheckedAPIMessage
+     */
     private CheckedAPIMessage tryToExtractKey(String url) {
         try {
             Set<String> apiKeys = keyExtractor.getKeys(url, keyExtractionProperties.getScrapingDepthLevel());
