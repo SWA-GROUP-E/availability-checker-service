@@ -9,6 +9,9 @@ import org.springframework.web.client.RestOperations;
 
 import java.util.Optional;
 
+/**
+ * A Service that tests the status of the API
+ */
 @Log4j2
 @AllArgsConstructor
 @Service
@@ -21,6 +24,12 @@ public class ApiTestService {
         return test(url, null);
     }
 
+    /**
+     * Service entry point takes an api and its key determines if its a valid api or not
+     * @param url
+     * @param apiKey
+     * @return ApiTestStatus
+     */
     public ApiTestStatus test(String url, String apiKey) {
         try {
             log.info("Testing url {}. apiKey = {}", url, apiKey);

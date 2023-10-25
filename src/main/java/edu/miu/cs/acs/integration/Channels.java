@@ -6,6 +6,10 @@ import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.messaging.MessageChannel;
 
+
+/*
+* This class is used to define channels
+* */
 @MessageEndpoint
 public class Channels {
 

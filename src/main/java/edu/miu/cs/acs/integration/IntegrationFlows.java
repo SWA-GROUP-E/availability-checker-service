@@ -20,6 +20,10 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 
+
+/**
+ * This class is used to define all the service activators that handle the output and input channels messages
+ */
 @Log4j2
 @AllArgsConstructor
 @Configuration
@@ -29,6 +33,11 @@ public class IntegrationFlows {
     private IntegrationProperties integrationProperties;
     private BusinessOrchestrator controlFlow;
 
+    /**
+     * Input channel handler
+     * @param inputMessage
+     * @return inputMessage
+     */
     @ServiceActivator(inputChannel = Channels.INPUT_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<ApiInfo> processInput(Message<String> inputMessage) {
         log.info("Processing input message: {}", inputMessage);
@@ -52,6 +61,12 @@ public class IntegrationFlows {
                 .setHeader(HeaderUtils.SERVICE_LINE, serviceLine.getValue()).build();
     }
 
+    /**
+     * handles APIs that are free and dont require a key
+     * @param inputMessage
+     * @return
+     * @throws JsonProcessingException
+     */
     @ServiceActivator(inputChannel = Channels.UNAUTHORIZED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<HealthyApiInfo> processUnauthorizedApi(Message<ApiInfo> inputMessage) throws JsonProcessingException {
         log.info("Processing unauthorized api message: {}", inputMessage);
@@ -69,6 +84,12 @@ public class IntegrationFlows {
                 .build();
     }
 
+    /**
+     * handles API that are free but requires a key and our service successfully extracted the key for them
+     * @param inputMessage
+     * @return
+     * @throws JsonProcessingException
+     */
     @ServiceActivator(inputChannel = Channels.SUCCESSFUL_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<HealthyApiInfo> processSuccessfulApi(Message<ApiInfo> inputMessage) throws JsonProcessingException {
         log.info("Processing successful api message: {}", inputMessage);
@@ -89,6 +110,12 @@ public class IntegrationFlows {
                 .build();
     }
 
+    /**
+     * handles failed API and the APIs that we couldn't extract a key for
+     * @param inputMessage
+     * @return
+     * @throws JsonProcessingException
+     */
     @ServiceActivator(inputChannel = Channels.FAILED_API_CHANNEL, outputChannel = Channels.ROUTING_CHANNEL)
     public Message<UnsureApiInfo> processFailedApi(Message<ApiInfo> inputMessage) throws JsonProcessingException {
         log.info("Processing failed api message: {}", inputMessage);
@@ -106,6 +133,10 @@ public class IntegrationFlows {
                 .build();
     }
 
+    /**
+     * Message Header based routing
+     * @return
+     */
     @ServiceActivator(inputChannel = Channels.ROUTING_CHANNEL)
     @Bean
     public HeaderValueRouter router() {

@@ -15,17 +15,31 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Web scrapper that searches the internet for a key for the input
+ */
 @Service
 @Log4j2
 public class KeyExtraction {
 
     private static final Pattern API_KEY_PATTERN = Pattern.compile("^[A-Za-z0-9]{32}$");
 
-    public static boolean isPotentialApiKey(String string) {
+    /**
+     * a regex validator for apikeys to ensure all extracted values all actually an apikey
+     * @param string
+     * @return boolean
+     */
+    private static boolean isPotentialApiKey(String string) {
         Matcher matcher = API_KEY_PATTERN.matcher(string);
         return matcher.matches();
     }
 
+    /**
+     * entry point of the service
+     * @param url the api url you want the keys for
+     * @param depth how many nested links you want to search
+     * @return Set of ApiKeys
+     */
     public Set<String> getKeys(String url, int depth) {
         Set<String> apiKeys = new HashSet<>();
         if (depth <= 0) {
@@ -48,6 +62,12 @@ public class KeyExtraction {
         return apiKeys;
     }
 
+    /**
+     * gets all the urls on the page to be used for scrapping
+     * @param baseDomain
+     * @param document
+     * @return urls
+     */
     private Set<String> extractUrls(String baseDomain, Document document) {
         Set<String> urls = new HashSet<>();
 
@@ -65,6 +85,11 @@ public class KeyExtraction {
         return urls;
     }
 
+    /**
+     * handle stream operations on the apikeys flow
+     * @param document
+     * @return a set of validated apikeys
+     */
     private Set<String> getKeys(Document document) {
         ArrayList<Element> potentialKeyElements = getPotentialKeyPlaces(document);
 
@@ -76,7 +101,12 @@ public class KeyExtraction {
         return apiKeys;
     }
 
-    public static ArrayList<Element> getPotentialKeyPlaces(Document document) {
+    /**
+     * defines all the possiable places an apikey can be found in html
+     * @param document
+     * @return all the elements that caontains apikeys
+     */
+    private static ArrayList<Element> getPotentialKeyPlaces(Document document) {
         ArrayList<Element> apiKeys = new ArrayList<>();
 
 
